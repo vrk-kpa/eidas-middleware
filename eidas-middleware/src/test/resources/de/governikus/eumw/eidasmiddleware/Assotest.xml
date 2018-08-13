@@ -30,7 +30,7 @@
 	<saml2:AttributeStatement>
 		<saml2:Attribute FriendlyName="FamilyName"
 			Name="http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName"
-			NameFormat="urn:oasis:names:tc:SAML:2.0:attrnameformat:uri">
+			NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
 			<saml2:AttributeValue languageID="de"
 				xsi:type="eidas:CurrentFamilyNameType">
 				von Drebenbusch-Dalgoßen
@@ -38,7 +38,7 @@
 		</saml2:Attribute>
 		<saml2:Attribute FriendlyName="FirstName"
 			Name="http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName"
-			NameFormat="urn:oasis:names:tc:SAML:2.0:attrnameformat:uri">
+			NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
 			<saml2:AttributeValue languageID="de"
 				xsi:type="eidas:CurrentGivenNameType">
 				Hans-Günther
@@ -46,21 +46,21 @@
 		</saml2:Attribute>
 		<saml2:Attribute FriendlyName="DateOfBirth"
 			Name="http://eidas.europa.eu/attributes/naturalperson/DateOfBirth"
-			NameFormat="urn:oasis:names:tc:SAML:2.0:attrnameformat:uri">
+			NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
 			<saml2:AttributeValue xsi:type="eidas:DateOfBirthType">
 				1946-01-25
 			</saml2:AttributeValue>
 		</saml2:Attribute>
 		<saml2:Attribute FriendlyName="PlaceOfBirth"
 			Name=" http://eidas.europa.eu/attributes/naturalperson/PlaceOfBirth"
-			NameFormat="urn:oasis:names:tc:SAML:2.0:attrnameformat:uri">
+			NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
 			<saml2:AttributeValue xsi:type="eidas:PlaceOfBirthType">
 				BREMERHAVEN
 			</saml2:AttributeValue>
 		</saml2:Attribute>
 		<saml2:Attribute FriendlyName="PersonIdentifier"
 			Name="http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier"
-			NameFormat="urn:oasis:names:tc:SAML:2.0:attrnameformat:uri">
+			NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
 			<saml2:AttributeValue xsi:type="eidas:PersonIdentifierType">
 				9aaeb4e9702ead0baa26e334031ca9fa37a57763aa44e4df1acde59ce042b4bb
 			</saml2:AttributeValue>
