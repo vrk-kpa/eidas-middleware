@@ -212,17 +212,16 @@ public class EidasResponse
       Signer.signObjects(sigs);
 
       openSamlResp = resp;
-      returnValue = getResonseBytes();
-/*
+
+      //returnValue = getResonseBytes(true);
       Transformer trans = TransformerFactory.newInstance().newTransformer();
       trans.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
       // Please note: you cannot format the output without breaking signature!
       try (ByteArrayOutputStream bout = new ByteArrayOutputStream())
       {
         trans.transform(new DOMSource(all), new StreamResult(bout));
-        returnValue = bout.toByteArray();
+        returnValue = stripCR(bout.toByteArray());
       }
-*/
     }
     return returnValue;
   }
@@ -297,16 +296,21 @@ public class EidasResponse
       Unmarshaller unmarshaller = unmarshallerFactory.getUnmarshaller(metadataRoot);
       Response resp = (Response)unmarshaller.unmarshall(metadataRoot);
 
-      XMLSignatureHandler.addSignature(resp,
-                                       signer.getSigKey(),
-                                       signer.getSigCert(),
-                                       signer.getSigType(),
-                                       signer.getSigDigestAlg());
       for ( Assertion a : assertions )
       {
         a.setParent(null);
         resp.getEncryptedAssertions().add(this.encrypter.encrypter.encrypt(a));
       }
+
+      //Removing CR
+      resp = removeAllCarigeReturnElements(resp, ppMgr);
+
+      //Add signature object after the Encrypted assertions are added and CR characters removed.
+      XMLSignatureHandler.addSignature(resp,
+              signer.getSigKey(),
+              signer.getSigCert(),
+              signer.getSigType(),
+              signer.getSigDigestAlg());
 
       if (resp.getSignature() != null)
       {
@@ -323,25 +327,44 @@ public class EidasResponse
       Signer.signObjects(sigs);
 
       openSamlResp = resp;
-      returnValue = getResonseBytes();
 
-/*
       Transformer trans = TransformerFactory.newInstance().newTransformer();
       trans.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
       // Please note: you cannot format the output without breaking signature!
       try (ByteArrayOutputStream bout = new ByteArrayOutputStream())
       {
         trans.transform(new DOMSource(all), new StreamResult(bout));
-        returnValue = bout.toByteArray();
+        //Remove CR from signature value
+        returnValue = stripCR(bout.toByteArray());
       }
-*/
     }
     return returnValue;
   }
 
-  private byte[] getResonseBytes() throws MarshallingException {
-      Element responseElm = XMLObjectProviderRegistrySupport.getMarshallerFactory().getMarshaller(openSamlResp).marshall(openSamlResp);
-      return SerializeSupport.nodeToString(responseElm).getBytes(Charset.forName("UTF-8"));
+  private Response removeAllCarigeReturnElements(Response response, BasicParserPool ppMgr) throws IOException, XMLParserException, UnmarshallingException, MarshallingException {
+
+    Marshaller rm = XMLObjectProviderRegistrySupport.getMarshallerFactory().getMarshaller(response.getElementQName());
+    String responseStr = stripCR(SerializeSupport.nodeToString(rm.marshall(response)));
+
+    try (InputStream is = new ByteArrayInputStream(responseStr.getBytes(StandardCharsets.UTF_8)))
+    {
+      Document inCommonMDDoc = ppMgr.parse(is);
+      Element responseElement = inCommonMDDoc.getDocumentElement();
+      // Get apropriate unmarshaller
+      UnmarshallerFactory unmarshallerFactory = XMLObjectProviderRegistrySupport.getUnmarshallerFactory();
+      Unmarshaller unmarshaller = unmarshallerFactory.getUnmarshaller(responseElement);
+      return  (Response)unmarshaller.unmarshall(responseElement);
+    }
+
+  }
+
+  private String stripCR (String stringWithCrEntity){
+    String stripped = stringWithCrEntity.replaceAll("&#13;","").replaceAll("&#xd;","").replaceAll("&#xD;","");
+    return stripped;
+  }
+
+  private byte[] stripCR(byte[] toByteArray) {
+    return stripCR(new String (toByteArray, StandardCharsets.UTF_8)).getBytes(StandardCharsets.UTF_8);
   }
 
 
