@@ -13,20 +13,18 @@ package de.governikus.eumw.eidasstarterkit;
 import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.util.logging.Logger;
 
 import javax.xml.bind.DatatypeConverter;
 
-import de.governikus.eumw.eidasstarterkit.ossigner.SignSamlUtil;
 import org.apache.xml.security.algorithms.JCEMapper;
 import org.apache.xml.security.signature.XMLSignature;
-import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.common.SAMLObjectContentReference;
 import org.opensaml.saml.common.SignableSAMLObject;
 import org.opensaml.saml.security.impl.SAMLSignatureProfileValidator;
 import org.opensaml.security.x509.BasicX509Credential;
 import org.opensaml.xmlsec.encryption.support.EncryptionConstants;
 import org.opensaml.xmlsec.signature.KeyInfo;
-import org.opensaml.xmlsec.signature.SignableXMLObject;
 import org.opensaml.xmlsec.signature.Signature;
 import org.opensaml.xmlsec.signature.X509Data;
 import org.opensaml.xmlsec.signature.X509IssuerName;
@@ -126,16 +124,7 @@ public final class XMLSignatureHandler
 
     if (credential instanceof PKCS11Credential){
       JCEMapper.setProviderId(null);
-
-/*
-      try {
-        //JCEMapper.setProviderId("SunPKCS11-softhsm");
-        SignSamlUtil.sign(signable, credential, credential.getEntityCertificate());
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-      return;
-*/
+      Logger.getLogger(XMLSignatureHandler.class.getName()).info("Signing with PKCS11 credentials. Object: " + signable.getClass().toString());
     }
 
     if (type == SigEntryType.NONE)
