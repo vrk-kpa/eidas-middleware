@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 
+import de.governikus.eumw.eidasstarterkit.XMLSignatureHandler;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.core.xml.io.UnmarshallingException;
@@ -96,7 +97,7 @@ public class NewRequesterServlet
     try
     {
       EidasSaml.init();
-      EidasSigner signer = new EidasSigner(true, helper.demoSignatureKey, helper.demoSignatureCertificate);
+      EidasSigner signer = new EidasSigner(true, XMLSignatureHandler.getCredential(helper.demoSignatureKey, helper.demoSignatureCertificate));
 
       samlRequest = EidasSaml.createRequest(Utils.createOwnUrlPrefix(request),
                                             Utils.createOwnUrlPrefix(request) + "/NewReceiverServlet",

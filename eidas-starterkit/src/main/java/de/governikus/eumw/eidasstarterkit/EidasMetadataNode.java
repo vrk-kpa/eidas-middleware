@@ -300,8 +300,7 @@ public class EidasMetadataNode
       EntityDescriptor metaData = (EntityDescriptor)unmarshaller.unmarshall(metadataRoot);
 
       XMLSignatureHandler.addSignature(metaData,
-                                       signer.getSigKey(),
-                                       signer.getSigCert(),
+                                       signer.getCredential(),
                                        signer.getSigType(),
                                        signer.getSigDigestAlg());
       sigs.add(metaData.getSignature());

@@ -440,8 +440,7 @@ class EidasMetadataService
     List<Signature> sigs = new ArrayList<>();
 
     XMLSignatureHandler.addSignature(entityDescriptor,
-                                     signer.getSigKey(),
-                                     signer.getSigCert(),
+                                     signer.getCredential(),
                                      signer.getSigType(),
                                      signer.getSigDigestAlg());
     sigs.add(entityDescriptor.getSignature());

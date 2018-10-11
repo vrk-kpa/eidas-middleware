@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 
+import de.governikus.eumw.eidasmiddleware.EidsaSignerCredentialConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opensaml.core.config.InitializationException;
@@ -73,8 +74,7 @@ public class Metadata extends HttpServlet
     list.add(EidasNaturalPersonAttributes.BIRTH_NAME);
     list.add(EidasNaturalPersonAttributes.PLACE_OF_BIRTH);
     list.add(EidasNaturalPersonAttributes.DATE_OF_BIRTH);
-    EidasSigner signer = new EidasSigner(true, ConfigHolder.getSignatureKey(),
-                                         ConfigHolder.getSignatureCert());
+    EidasSigner signer = new EidasSigner(true, EidsaSignerCredentialConfiguration.getMetadataSigningCredential());
     List<EidasNameIdType> supportedNameIdTypes = new ArrayList<>();
     supportedNameIdTypes.add(EidasNameIdType.PERSISTENT);
     supportedNameIdTypes.add(EidasNameIdType.TRANSIENT);

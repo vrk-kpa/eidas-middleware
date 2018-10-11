@@ -17,19 +17,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import de.governikus.eumw.eidasstarterkit.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import de.governikus.eumw.eidascommon.Utils;
 import de.governikus.eumw.eidascommon.Utils.X509KeyPair;
-import de.governikus.eumw.eidasstarterkit.EidasContactPerson;
-import de.governikus.eumw.eidasstarterkit.EidasNameIdType;
-import de.governikus.eumw.eidasstarterkit.EidasOrganisation;
-import de.governikus.eumw.eidasstarterkit.EidasRequestSectorType;
-import de.governikus.eumw.eidasstarterkit.EidasSaml;
-import de.governikus.eumw.eidasstarterkit.EidasSigner;
-
 
 
 public class Metadatatest
@@ -58,7 +52,7 @@ public class Metadatatest
     List<EidasNameIdType> supportedNameIdTypes = new ArrayList<>();
     supportedNameIdTypes.add(EidasNameIdType.TRANSIENT);
     supportedNameIdTypes.add(EidasNameIdType.UNSPECIFIED);
-    EidasSigner signer = new EidasSigner(true, keyPair.getKey(), keyPair.getCert());
+    EidasSigner signer = new EidasSigner(true, XMLSignatureHandler.getCredential(keyPair.getKey(), keyPair.getCert()));
     byte[] res = EidasSaml.createMetaDataNode("_dsfsdfs5454sfdsdfsdfsfd",
                                               "https://eubuild.tf.bos-test.de:8443/EidasSAMLDemo",
                                               new Date(),

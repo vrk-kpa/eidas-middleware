@@ -113,7 +113,7 @@ public class TestEidasSaml
     PrivateKey pk = Utils.readPKCS12(TestEidasSaml.class.getResourceAsStream(TEST_P12),
                                      "123456".toCharArray())
                          .getKey();
-    EidasSigner signer = new EidasSigner(pk, cert);
+    EidasSigner signer = new EidasSigner(XMLSignatureHandler.getCredential(pk,cert));
 
     byte[] request = EidasSaml.createRequest(issuer,
                                              destination,
@@ -222,7 +222,7 @@ public class TestEidasSaml
                                               "123456".toCharArray())};
     PrivateKey pk = keypair[0].getKey();
     EidasEncrypter encrypter = new EidasEncrypter(true, cert[0]);
-    EidasSigner signer = new EidasSigner(true, pk, cert[0]);
+    EidasSigner signer = new EidasSigner(true, XMLSignatureHandler.getCredential(pk, cert[0]));
 
     byte[] response = EidasSaml.createResponse(att,
                                                destination,
@@ -287,7 +287,7 @@ public class TestEidasSaml
                                               "123456".toCharArray())};
     PrivateKey pk = keypair[0].getKey();
     EidasEncrypter encrypter = new EidasEncrypter(true, cert[0]);
-    EidasSigner signer = new EidasSigner(true, pk, cert[0]);
+    EidasSigner signer = new EidasSigner(true, XMLSignatureHandler.getCredential(pk, cert[0]));
 
     byte[] response = new EidasResponse(destination, recipient, nameid, inResponseTo, issuer, loa, signer,
                                         encrypter).generateErrorRsp(ErrorCode.AUTHORIZATION_FAILED,
@@ -342,7 +342,7 @@ public class TestEidasSaml
     PrivateKey pk = Utils.readPKCS12(TestEidasSaml.class.getResourceAsStream(TEST_P12),
                                      "123456".toCharArray())
                          .getKey();
-    EidasSigner signer = new EidasSigner(pk, sigCert);
+    EidasSigner signer = new EidasSigner(XMLSignatureHandler.getCredential(pk, sigCert));
 
 
     byte[] mds = EidasSaml.createMetaDataService(id,

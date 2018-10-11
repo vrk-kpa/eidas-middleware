@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.TransformerException;
 
+import de.governikus.eumw.eidasstarterkit.*;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.core.xml.io.UnmarshallingException;
@@ -28,12 +29,6 @@ import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import de.governikus.eumw.eidasstarterkit.EidasContactPerson;
-import de.governikus.eumw.eidasstarterkit.EidasNameIdType;
-import de.governikus.eumw.eidasstarterkit.EidasOrganisation;
-import de.governikus.eumw.eidasstarterkit.EidasRequestSectorType;
-import de.governikus.eumw.eidasstarterkit.EidasSaml;
-import de.governikus.eumw.eidasstarterkit.EidasSigner;
 import lombok.extern.slf4j.Slf4j;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
 import net.shibboleth.utilities.java.support.xml.XMLParserException;
@@ -74,8 +69,7 @@ public class Metadata
     final String ownURL = request.getRequestURL().toString();
     final String postEndpoint = ownURL.replace("Metadata", "NewReceiverServlet");
     final EidasContactPerson eidasContactPerson = new EidasContactPerson(DEMO, DEMO, DEMO, DEMO, DEMO);
-    final EidasSigner signer = new EidasSigner(true, helper.demoSignatureKey,
-                                               helper.demoSignatureCertificate);
+    final EidasSigner signer = new EidasSigner(true, XMLSignatureHandler.getCredential(helper.demoSignatureKey, helper.demoSignatureCertificate));
     try
     {
       byte[] metadata = EidasSaml.createMetaDataNode("eIDASSAMLDemo",

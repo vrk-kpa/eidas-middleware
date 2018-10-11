@@ -191,8 +191,7 @@ public class EidasResponse
       Response resp = (Response)unmarshaller.unmarshall(metadataRoot);
 
       XMLSignatureHandler.addSignature(resp,
-                                       signer.getSigKey(),
-                                       signer.getSigCert(),
+                                       signer.getCredential(),
                                        signer.getSigType(),
                                        signer.getSigDigestAlg());
 
@@ -307,8 +306,7 @@ public class EidasResponse
 
       //Add signature object after the Encrypted assertions are added and CR characters removed.
       XMLSignatureHandler.addSignature(resp,
-              signer.getSigKey(),
-              signer.getSigCert(),
+              signer.getCredential(),
               signer.getSigType(),
               signer.getSigDigestAlg());
 

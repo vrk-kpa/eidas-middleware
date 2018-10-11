@@ -16,8 +16,12 @@ import java.security.cert.X509Certificate;
 
 import javax.xml.bind.DatatypeConverter;
 
+import de.governikus.eumw.eidasstarterkit.ossigner.SignSamlUtil;
+import org.apache.xml.security.algorithms.JCEMapper;
 import org.apache.xml.security.signature.XMLSignature;
+import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.common.SAMLObjectContentReference;
+import org.opensaml.saml.common.SignableSAMLObject;
 import org.opensaml.saml.security.impl.SAMLSignatureProfileValidator;
 import org.opensaml.security.x509.BasicX509Credential;
 import org.opensaml.xmlsec.encryption.support.EncryptionConstants;
@@ -41,6 +45,7 @@ import org.opensaml.xmlsec.signature.support.SignatureValidator;
 
 import de.governikus.eumw.eidascommon.ErrorCode;
 import de.governikus.eumw.eidascommon.ErrorCodeException;
+import se.elegnamnden.eidas.pkcs11.PKCS11Credential;
 
 
 /**
@@ -59,7 +64,7 @@ import de.governikus.eumw.eidascommon.ErrorCodeException;
  * 
  * @author TT / AHO
  */
-final class XMLSignatureHandler
+public final class XMLSignatureHandler
 {
 
   /**
@@ -75,16 +80,17 @@ final class XMLSignatureHandler
     ISSUERSERIAL
   }
 
-  /**
-   * Add a signature to a SignableXMLObject. Please note that this adds everything except the signature value
-   * itself. Make sure to add that after marshalling the XML object.
-   * 
-   * @param signable object to sign
-   * @param key signature key
-   * @param cert certificate matching the signature key
-   * @param type specifies how to identify the key in the signature
-   * @throws CertificateEncodingException
-   */
+//  /**
+//   * Add a signature to a SignableXMLObject. Please note that this adds everything except the signature value
+//   * itself. Make sure to add that after marshalling the XML object.
+//   *
+//   * @param signable object to sign
+//   * @param key signature key
+//   * @param cert certificate matching the signature key
+//   * @param type specifies how to identify the key in the signature
+//   * @throws CertificateEncodingException
+//   */
+/*
   static void addSignature(SignableXMLObject signable,
                                   PrivateKey key,
                                   X509Certificate cert,
@@ -92,15 +98,53 @@ final class XMLSignatureHandler
                                   String sigDigestAlg)
     throws CertificateEncodingException
   {
+    addSignature(signable, getCredential(key, cert), type, sigDigestAlg);
+  }
+*/
+
+  public static BasicX509Credential getCredential(PrivateKey key, X509Certificate cert){
+    BasicX509Credential credential = new BasicX509Credential(cert);
+    credential.setPrivateKey(key);
+    return credential;
+  }
+
+  /**
+   * Add a signature to a SignableXMLObject. Please note that this adds everything except the signature value
+   * itself. Make sure to add that after marshalling the XML object.
+   *
+   * @param signable object to sign
+   * @param credential signature credential
+   * @param type specifies how to identify the key in the signature
+   * @throws CertificateEncodingException
+   */
+  static void addSignature(SignableSAMLObject signable,
+                           BasicX509Credential credential,
+                           SigEntryType type,
+                           String sigDigestAlg)
+    throws CertificateEncodingException
+  {
+
+    if (credential instanceof PKCS11Credential){
+      JCEMapper.setProviderId(null);
+
+/*
+      try {
+        //JCEMapper.setProviderId("SunPKCS11-softhsm");
+        SignSamlUtil.sign(signable, credential, credential.getEntityCertificate());
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+      return;
+*/
+    }
+
     if (type == SigEntryType.NONE)
     {
       return;
     }
     Signature sig = new SignatureBuilder().buildObject();
-    BasicX509Credential credential = new BasicX509Credential(cert);
-    credential.setPrivateKey(key);
     sig.setSigningCredential(credential);
-    String keyAlg = key.getAlgorithm();
+    String keyAlg = credential.getPrivateKey().getAlgorithm();
 
     if ("EC".equalsIgnoreCase(keyAlg) || "ECDSA".equalsIgnoreCase(keyAlg))
     {
@@ -180,11 +224,11 @@ final class XMLSignatureHandler
     X509Data x509Data = new X509DataBuilder().buildObject();
     if (type == SigEntryType.CERTIFICATE)
     {
-      addCertificate(cert, x509Data);
+      addCertificate(credential.getEntityCertificate(), x509Data);
     }
     else if (type == SigEntryType.ISSUERSERIAL)
     {
-      addIssuerSerial(cert, x509Data);
+      addIssuerSerial(credential.getEntityCertificate(), x509Data);
     }
     keyInfo.getX509Datas().add(x509Data);
     sig.setKeyInfo(keyInfo);

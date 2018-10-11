@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 
+import de.governikus.eumw.eidasmiddleware.*;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.core.xml.io.UnmarshallingException;
 import org.opensaml.xmlsec.signature.support.SignatureException;
@@ -30,11 +31,6 @@ import org.opensaml.xmlsec.signature.support.SignatureException;
 import de.governikus.eumw.eidascommon.Constants;
 import de.governikus.eumw.eidascommon.ErrorCode;
 import de.governikus.eumw.eidascommon.Utils;
-import de.governikus.eumw.eidasmiddleware.ConfigHolder;
-import de.governikus.eumw.eidasmiddleware.RequestSession;
-import de.governikus.eumw.eidasmiddleware.ServiceProviderConfig;
-import de.governikus.eumw.eidasmiddleware.SessionStore;
-import de.governikus.eumw.eidasmiddleware.WebServiceHelper;
 import de.governikus.eumw.eidasmiddleware.eid.HttpServerUtils;
 import de.governikus.eumw.eidasmiddleware.eid.RequestingServiceProvider;
 import de.governikus.eumw.eidasstarterkit.EidasLoA;
@@ -270,8 +266,7 @@ public class TcToken extends HttpServlet
     EidasSigner signer;
     try
     {
-      signer = new EidasSigner(true, ConfigHolder.getAppSignatureKeyPair().getKey(),
-                               ConfigHolder.getAppSignatureKeyPair().getCert());
+      signer = new EidasSigner(true, EidsaSignerCredentialConfiguration.getSamlMessageSigningCredential());
       EidasResponse rsp = new EidasResponse(reqSP.getAssertionConsumerURL(), reqSP.getEntityID(), null,
                                             samlReqSession.getReqId(),
                                             ConfigHolder.getServerURLWithContextPath() + Metadata.METADATA,

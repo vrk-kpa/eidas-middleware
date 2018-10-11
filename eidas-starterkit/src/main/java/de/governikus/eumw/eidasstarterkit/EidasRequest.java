@@ -191,8 +191,7 @@ public class EidasRequest
       request = (AuthnRequest)unmarshaller.unmarshall(metadataRoot);
 
       XMLSignatureHandler.addSignature(request,
-                                       signer.getSigKey(),
-                                       signer.getSigCert(),
+                                       signer.getCredential(),
                                        signer.getSigType(),
                                        signer.getSigDigestAlg());
       sigs.add(request.getSignature());

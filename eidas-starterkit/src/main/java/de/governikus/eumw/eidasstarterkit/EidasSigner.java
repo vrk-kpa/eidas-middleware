@@ -14,6 +14,7 @@ import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 
 import de.governikus.eumw.eidasstarterkit.XMLSignatureHandler.SigEntryType;
+import org.opensaml.security.x509.BasicX509Credential;
 
 
 /**
@@ -28,14 +29,9 @@ public class EidasSigner
   private static String defaultHashAlgo="SHA256-PSS";
 
   /**
-   * signature key
+   * signature credentials
    */
-  private final PrivateKey sigKey;
-
-  /**
-   * signature certificate
-   */
-  private final X509Certificate sigCert;
+  private final BasicX509Credential credential;
 
   /**
    * digest algorithm to use in the signature
@@ -52,17 +48,16 @@ public class EidasSigner
     defaultHashAlgo = envHashSetting != null ? envHashSetting : defaultHashAlgo;
   }
 
-  private EidasSigner(boolean includeCert, PrivateKey key, X509Certificate cert, String digestAlg)
+  private EidasSigner(boolean includeCert, BasicX509Credential credential, String digestAlg)
   {
-    if (key == null || cert == null || digestAlg == null)
+    if (credential == null || digestAlg == null)
     {
       throw new IllegalArgumentException("must specify all arguments when setting a signer");
     }
     sigType = includeCert ? XMLSignatureHandler.SigEntryType.CERTIFICATE
       : XMLSignatureHandler.SigEntryType.ISSUERSERIAL;
-    sigKey = key;
-    sigCert = cert;
-    sigDigestAlg = digestAlg;
+    this.credential = credential;
+    this.sigDigestAlg = digestAlg;
   }
 
   /**
@@ -72,27 +67,20 @@ public class EidasSigner
    * algorithm to http://www.w3.org/2001/04/xmlenc#sha256
    *
    * @param includeCert
-   * @param key
-   * @param cert
+   * @param credential
    */
-  public EidasSigner(boolean includeCert, PrivateKey key, X509Certificate cert)
+  public EidasSigner(boolean includeCert, BasicX509Credential credential)
   {
-    this(includeCert, key, cert, defaultHashAlgo);
+    this(includeCert, credential, defaultHashAlgo);
   }
 
-  EidasSigner(PrivateKey key, X509Certificate cert)
+  EidasSigner(BasicX509Credential credential)
   {
-    this(true, key, cert);
+    this(true, credential);
   }
 
-  public PrivateKey getSigKey()
-  {
-    return sigKey;
-  }
-
-  public X509Certificate getSigCert()
-  {
-    return sigCert;
+  public BasicX509Credential getCredential() {
+    return credential;
   }
 
   public String getSigDigestAlg()

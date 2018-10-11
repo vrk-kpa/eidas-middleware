@@ -29,6 +29,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 
+import de.governikus.eumw.eidasmiddleware.*;
 import org.apache.commons.codec.binary.Hex;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.xml.io.MarshallingException;
@@ -40,11 +41,6 @@ import de.governikus.eumw.eidascommon.Constants;
 import de.governikus.eumw.eidascommon.ErrorCode;
 import de.governikus.eumw.eidascommon.ErrorCodeException;
 import de.governikus.eumw.eidascommon.Utils;
-import de.governikus.eumw.eidasmiddleware.ConfigHolder;
-import de.governikus.eumw.eidasmiddleware.RequestSession;
-import de.governikus.eumw.eidasmiddleware.ServiceProviderConfig;
-import de.governikus.eumw.eidasmiddleware.SessionStore;
-import de.governikus.eumw.eidasmiddleware.WebServiceHelper;
 import de.governikus.eumw.eidasmiddleware.eid.HttpServerUtils;
 import de.governikus.eumw.eidasmiddleware.eid.RequestingServiceProvider;
 import de.governikus.eumw.eidasstarterkit.EidasAttribute;
@@ -426,8 +422,7 @@ public class ResponseSender extends HttpServlet
     UnmarshallingException, EncryptionException, MarshallingException, SignatureException,
     TransformerFactoryConfigurationError, TransformerException, ComponentInitializationException
   {
-    EidasSigner signer = new EidasSigner(true, ConfigHolder.getAppSignatureKeyPair().getKey(),
-                                         ConfigHolder.getAppSignatureKeyPair().getCert());
+    EidasSigner signer = new EidasSigner(true, EidsaSignerCredentialConfiguration.getSamlMessageSigningCredential());
     EidasEncrypter encrypter = new EidasEncrypter(true, reqSP.getEncryptionCert());
 
     byte[] eidasResp = EidasSaml.createResponse(attributes,
@@ -554,8 +549,7 @@ public class ResponseSender extends HttpServlet
     EidasSigner signer;
     try
     {
-      signer = new EidasSigner(true, ConfigHolder.getAppSignatureKeyPair().getKey(),
-                               ConfigHolder.getAppSignatureKeyPair().getCert());
+      signer = new EidasSigner(true, EidsaSignerCredentialConfiguration.getSamlMessageSigningCredential());
       EidasResponse rsp = new EidasResponse(reqSP.getAssertionConsumerURL(), reqSP.getEntityID(), null,
                                             samlReqSession.getReqId(),
                                             ConfigHolder.getServerURLWithContextPath() + Metadata.METADATA,
