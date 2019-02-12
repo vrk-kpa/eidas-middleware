@@ -65,6 +65,18 @@
             <artifactId>opensaml-pkcs11-support</artifactId>
             <version>1.1.1</version>
         </dependency>
+        <dependency>
+          <groupId>com.cavium</groupId>
+          <artifactId>cloudhsm</artifactId>
+          <version>1.1.2</version>
+          <scope>system</scope>
+          <systemPath>/opt/cloudhsm/java/cloudhsm-1.1.2.jar</systemPath>
+        </dependency>
+        <dependency>
+          <groupId>org.hamcrest</groupId>
+          <artifactId>hamcrest-all</artifactId>
+          <version>1.3</version>
+        </dependency>
 
         <!-- logging -->
         <dependency>
@@ -94,6 +106,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                  <includeSystemScope>true</includeSystemScope>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
