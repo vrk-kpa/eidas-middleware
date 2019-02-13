@@ -1,0 +1,81 @@
+### AWS CloudHSM key generation
+## Prerequisites
+CloudHSM-cluster and HSM needs to be initialized according to the AWS guide at https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html. 
+
+## Creating users to cloudHSM:
+   Run the following commands to create middleware_user
+   
+   /opt/cloudhsm/bin/cloudhsm_mgmt_util /opt/cloudhsm/etc/cloudhsm_mgmt_util.cfg
+   enable_e2e
+   loginHSM CO admin <password>
+   createUser CU middleware_user <password>
+
+## Generating extractable keys keys
+   Run the following commands to create keys in the HSM. If you want to generate non-extractable keys add -nex parameter to the genRSAKeyPair command.
+
+   /opt/cloudhsm/bin/key_mgmt_util
+   loginHSM -u CU -s middleware_user -p <password>
+   genRSAKeyPair -m 3072 -e 65537 -l demwenc -id demwenc -attest
+   genRSAKeyPair -m 3072 -e 65537 -l demw -id mwde -attest
+   
+## Setting key attributes 
+   These commands will set and unset sign encrypt and decrypt attributes according to key usage
+   
+   /opt/cloudhsm/bin/cloudhsm_mgmt_util /opt/cloudhsm/etc/cloudhsm_mgmt_util.cfg   
+   enable_e2e
+   loginHSM CU middleware_user <password>
+   setAttribute [demw-privkey-handle] 260 0
+   setAttribute [demw-privkey-handle] 261 0
+   setAttribute [demw-privkey-handle] 264 1
+   setAttribute [demwenc-privkey-handle] 260 0
+   setAttribute [demwenc-privkey-handle] 261 1
+   setAttribute [demwenc-privkey-handle] 264 0
+   
+   We also need to change the public keys handles so that middleware doesn't read the public key instead of the private key
+   setAttribute [demw-pubkey-handle] 3 demw_pub
+   setAttribute [demwenc-pubkey-handle] 3 demwenc_pub
+
+## Generating certificates
+   To generate certificates for private keys which are inside the HSM we need to export the public keys ja generate a dummy csr from a dummy key and then use the -force_pubkey openssl parameter when we sign the crs. This will generate a certificat which matches the private key inside cloudHSM.
+
+   First we need to export the public keys
+   
+   /opt/cloudhsm/bin/key_mgmt_util
+   loginHSM -u CU -s middleware_user -p <password>
+   exportPubKey -k [demw-pubkey-handle] -out demw-pubkey.pem
+   exportPubKey -k [demwenc-pubkey-handle] -out demwenc-pubkey.pem
+   
+   Second we generate a dummy key and dummy csr
+   
+   openssl genrsa -out dummy.key 3072
+   openssl req -new -x509 -days 3652 -key dummy.key -out dummy.crt -subj "/C=FI/ST=Default/L=Default-city/O=Default-company/OU=Test Certificate/CN=Test CA"
+
+   Third we generate the certificate using -force_pubkey parameter. The contents for the openssl-eidas.cnf file are at the end. 
+
+   Signing certificate:
+   openssl req -new -nodes -key dummy.key -sha256 -out dummy.csr -subj "/C=FI/ST=Default/L=Default-city/O=Default-company/OU=Test Certificate/CN=Middleware Signing" -sigopt rsa_padding_mode:pss -config openssl-eidas.cnf -extensions signing
+   openssl x509 -req -in dummy.csr -CAkey dummy.key -CA dummy.crt -force_pubkey demw-pubkey.pem -out middleware-saml-sign.crt -CAcreateserial -days 1800 -sigopt rsa_padding_mode:pss -extfile openssl-eidas.cnf -extensions signing
+   
+   Encryption certificate:
+   openssl req -new -nodes -key dummy.key -sha256 -out dummy.csr -subj "/C=FI/ST=Default/L=Default-city/O=Default-company/OU=Test Certificate/CN=Middleware Encryption" -sigopt rsa_padding_mode:pss -config openssl-eidas.cnf -extensions encryption
+   openssl x509 -req -in dummy.csr -CAkey dummy.key -CA dummy.crt -force_pubkey demwenc-pubkey.pem -out middleware-saml-encrypt.crt -CAcreateserial -days 1800 -sigopt rsa_padding_mode:pss -extfile openssl-eidas.cnf -extensions encryption
+  
+## openssl-eidas.cnf content
+
+   [req] # openssl req params
+   prompt = yes
+   distinguished_name = dn-param
+   
+   [dn-param] # DN fields
+   
+   [signing] # openssl extensions
+   subjectKeyIdentifier = hash
+   authorityKeyIdentifier = keyid:always
+   keyUsage = digitalSignature
+   basicConstraints = CA:FALSE
+   
+   [encryption] # openssl extensions
+   subjectKeyIdentifier = hash
+   authorityKeyIdentifier = keyid:always
+   keyUsage = keyEncipherment
+   basicConstraints = CA:FALSE
