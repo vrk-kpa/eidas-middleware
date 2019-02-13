@@ -25,9 +25,12 @@ The credentials can be provided for eidas-middleware service as environment vari
 After these modify the hsmExternalCfgLocations property in pkcs11.properties file in the middleware config 
 folder to point to a file with the following content:
 
+```
 library = /opt/cloudhsm/lib/libcloudhsm_pkcs11.so
 name = cloudhsm
 slot = 1
+```
 
-The rest of the configurations should be the same as when deploying with the Swedish implementation of softHSM.
-
+The rest of the configurations should be the same as when deploying with the Swedish implementation of softHSM 
+and official German EIDAS Middleware guidance:
+(https://github.com/Governikus/eidas-middleware/releases/download/1.0.7/eIDASMiddleware.pdf)
