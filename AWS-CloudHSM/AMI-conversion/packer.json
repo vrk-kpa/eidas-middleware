@@ -1,0 +1,51 @@
+{
+  "builders": [
+    {
+      "type": "amazon-ebssurrogate",
+      "region": "eu-central-1",
+      "ssh_username": "ec2-user",
+      "instance_type": "t2.nano",
+      "ami_virtualization_type": "hvm",
+      "launch_block_device_mappings": [
+        {
+          "volume_type": "gp2",
+          "device_name": "/dev/xvdf",
+          "delete_on_termination": true,
+          "volume_size": 8
+        }
+      ],
+      "ami_root_device": {
+        "source_device_name": "/dev/xvdf",
+        "device_name": "/dev/xvda",
+        "delete_on_termination": true,
+        "volume_size": 8,
+        "volume_type": "gp2"
+      },
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "name": "amzn2-ami-hvm-*-x86_64-gp2",
+          "root-device-type": "ebs"
+        },
+        "owners": [
+          "137112412989"
+        ],
+        "most_recent": true
+      },
+      "ami_name": "eIDAS Middleware 1.0.7 ({{isotime \"2006-01-02\"}})",
+      "ami_users": "984744005352"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "chroot-bootstrap.sh",
+      "destination": "/tmp/chroot-bootstrap.sh"
+    },
+    {
+      "type": "shell",
+      "script": "bootstrap.sh",
+      "execute_command": "echo 'packer' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'"
+    }
+  ]
+}
